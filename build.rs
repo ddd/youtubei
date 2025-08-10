@@ -1,4 +1,3 @@
-use std::env;
 use std::io::Result;
 use std::path::PathBuf;
 
@@ -12,15 +11,22 @@ fn main() -> Result<()> {
         "innertube/flag.proto",
     ];
 
-    let proto_paths = ["."];
+    let proto_paths = [
+        PathBuf::from("."),
+    ];
 
-    // Tell Cargo to rerun this build script if any of the proto files change
+    // Debug information
+    println!("cargo:warning=Current working directory: {:?}", std::env::current_dir().unwrap());
+    println!("cargo:warning=Proto paths: {:?}", proto_paths);
+    println!("cargo:warning=Proto files: {:?}", proto_files);
+    
+    // Check if proto files exist
     for proto_file in &proto_files {
-        println!("cargo:rerun-if-changed={}", proto_file);
+        let full_path = proto_paths[0].join(proto_file);
+        println!("cargo:warning=Checking proto file: {:?} - exists: {}", full_path, full_path.exists());
     }
 
     prost_build::Config::new()
-        .out_dir("pb")
         .compile_protos(&proto_files, &proto_paths)?;
 
     Ok(())
