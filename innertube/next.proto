@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package youtube.innertube;
+
+import "innertube/context.proto";
+
+message NextRequest {
+  Context context = 1;
+  string video_id = 2;
+}
+
+message NextResponse {
+  // Initial videos fetch (videos tab)
+  message Contents {
+
+    // Watch Next (recommended)
+    message TwoColumnWatchNextResults {
+
+      message SecondaryResults {
+        message SecondaryResults {
+          message Results {
+            message CompactVideoRenderer {
+              string video_id = 1;
+              message ShortBylineText {
+                message Runs {
+                  message NavigationEndpoint {
+                    message BrowseEndpoint {
+                      string browse_id = 2;
+                    }
+                    BrowseEndpoint browse_endpoint = 48687626;
+                  }
+                  NavigationEndpoint navigation_endpoint = 5;
+                }
+                Runs runs = 1;
+              }
+              ShortBylineText short_byline_text = 10;
+            }
+            CompactVideoRenderer compact_video_renderer = 50630979;
+          }
+          repeated Results results = 1;
+        }
+        SecondaryResults secondary_results = 51779776;
+      }
+      SecondaryResults secondary_results = 2;
+    }
+    TwoColumnWatchNextResults two_column_watch_next_results = 51779759;
+  }
+  Contents contents = 7;
+}

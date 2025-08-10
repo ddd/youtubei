@@ -1,0 +1,441 @@
+syntax = "proto3";
+
+package youtube.innertube;
+
+import "innertube/context.proto";
+
+message ChannelContinuation {
+  message Token {
+    string channelId = 2;
+    string requestToken = 3;
+  }
+  Token token = 80226972;
+}
+
+message BrowseRequest {
+  Context context = 1;
+  optional string browseId = 2;
+  optional string params = 3;
+  optional string continuation = 7;
+}
+
+message BrowseResponse {
+  // Initial videos fetch (videos tab)
+  message Contents {
+
+    message TwoColumnBrowseResultsRenderer {
+      message Tabs {
+        message TabRenderer {
+          string title = 2;
+          message Content {
+            message RichGridRenderer {
+              message Contents {
+                message ContinuationItemRenderer {
+                  message ContinuationEndpoint {
+                    message ContinuationCommand {
+                      // continuation token
+                      string token = 1;
+                    }
+                    ContinuationCommand continuation_command = 280298060;
+                  }
+                  ContinuationEndpoint continuation_endpoint = 2;
+                }
+                ContinuationItemRenderer continuation_item_renderer = 159495980;
+                message RichItemRenderer {
+                  message Content {
+                    message VideoRenderer {
+                      string video_id = 1;
+                      message ViewCountText {
+                        string simple_text = 4;
+                      }
+                      ViewCountText view_count_text = 8;
+                      message Badge {
+                        message MetadataBadgeRenderer {
+                          message Icon {
+                            int64 icon_type = 1;
+                          }
+                          Icon icon = 1;
+                          string label = 3;
+                        }
+                        MetadataBadgeRenderer metadata_badge_renderer = 128361622;
+                      }
+                      repeated Badge badges = 10;
+                      message UpcomingEventData {
+                        message UpcomingEventText {
+                          message Runs {
+                            string text = 1;
+                          }
+
+                          repeated Runs runs = 1;
+                        }
+                        UpcomingEventText upcoming_event_text = 3;
+                      }
+                      UpcomingEventData upcoming_event_data = 17;
+                    }
+                    VideoRenderer video_renderer = 50577878;
+                  }
+                  Content content = 1;
+                }
+                RichItemRenderer rich_item_renderer = 258632786;
+              }
+              repeated Contents contents = 1;
+            }
+            RichGridRenderer rich_grid_renderer = 255072793;
+          }
+          Content content = 4;
+        }
+        TabRenderer tab_renderer = 58174010;
+      }
+      repeated Tabs tabs = 3;
+    }
+    TwoColumnBrowseResultsRenderer two_column_browse_results_renderer = 52123031;
+
+    // only on TV client
+    message TvBrowseRenderer {
+      message Content {
+        message TvSurfaceContentRenderer {
+          message Content {
+            message SectionListRenderer {
+              message Contents {
+                message ShelfRenderer {
+                  message HeaderRenderer {
+                    message ShelfHeaderRenderer {
+                      message AvatarLockup {
+                        message AvatarLockupRenderer {
+                          message Title {
+                            string simple_text = 4;
+                          }
+                          Title title = 1;
+                        }
+                        AvatarLockupRenderer avatar_lockup_renderer = 511960348;
+                      }
+                      AvatarLockup avatar_lockup = 9;
+                    }
+                    ShelfHeaderRenderer shelf_header_renderer = 300177939;
+                  }
+                  HeaderRenderer header_renderer = 36;
+                }
+                ShelfRenderer shelf_renderer = 51845067;
+              }
+              repeated Contents contents = 1;
+            }
+            SectionListRenderer section_list_renderer = 49399797;
+          }
+          Content content = 1;
+        }
+        TvSurfaceContentRenderer tv_surface_content_renderer = 161721939;
+      }
+      Content content = 1;
+    }
+    TvBrowseRenderer tv_browse_renderer = 147061951;
+  }
+  Contents contents = 9;
+
+  message Header {
+    message PageHeaderRenderer {
+      message Content {
+        message PageHeaderViewModel {
+          message Title {
+            message DynamicTextViewModel {
+              message Text {
+                message AttachmentRuns {
+                  message Element {
+                    message Type {
+                      message ImageType {
+                        message Image {
+                          message Sources {
+                            message ClientResourceType {
+                              // CHECK_CIRCLE_FILLED for verified, MUSIC_FILLED for OAC
+                              string image_name = 2;
+                            }
+                            ClientResourceType client_resource = 3;
+                          }
+                          Sources sources = 1;
+                        }
+                        Image image = 1;
+                      }
+                      ImageType image_type = 158796345;
+                    }
+                    Type type = 1;
+                  }
+                  Element element = 3;
+                }
+                AttachmentRuns attachment_runs = 8;
+              }
+              Text text = 1;
+            }
+            DynamicTextViewModel dynamic_text_view_model = 509603841;
+          }
+          Title title = 2;
+          message Banner {
+            message ImageBannerViewModel {
+              message Image {
+                message Sources {
+                  string url = 1;
+                }
+                repeated Sources sources = 1;
+              }
+              Image image = 1;
+            }
+            ImageBannerViewModel image_banner_view_model = 1127;
+          }
+          Banner banner = 10;
+        }
+        PageHeaderViewModel page_header_view_model = 508686415;
+      }
+      Content content = 2;
+    }
+    PageHeaderRenderer page_header_renderer = 509923604;
+
+    message CarouselHeaderRenderer {
+      message Contents {
+        message CarouselItemRenderer {
+          message carouselItems_type {
+            message defaultPromoPanelRenderer_type {
+              message title_type {
+                message runs_type {
+                  string text = 1;
+                }
+                runs_type runs = 1;
+              }
+              title_type title = 1;
+            }
+            defaultPromoPanelRenderer_type defaultPromoPanelRenderer = 144881215;
+          }
+          repeated carouselItems_type carouselItems = 1;
+        }
+        CarouselItemRenderer carousel_item_renderer = 144757704;
+      }
+      repeated Contents contents = 5;
+    }
+    CarouselHeaderRenderer carousel_header_renderer = 251530672;
+  }
+  Header header = 13;
+
+  // alerts
+  message Alerts {
+    message AlertRenderer {
+      message Text {
+        // termination reason
+        string simpleText = 4;
+      }
+      Text text = 2;
+    }
+    AlertRenderer alert_renderer = 58057493;
+  }
+  Alerts alerts = 14;
+
+  // title & avatar urls
+  message Metadata {
+    message ChannelMetadataRenderer {
+      string title = 1;
+      string description = 2;
+      message Avatar {
+        message Thumbnails {
+          string url = 1;
+        }
+        Thumbnails thumbnails = 1;
+      }
+      Avatar avatar = 14;
+    }
+    ChannelMetadataRenderer channel_metadata_renderer = 57075253;
+  }
+  Metadata metadata = 15;
+
+  // topbar, used for detecting country code
+  message Topbar {
+    message DesktopTopbarRenderer {
+      string country_code = 7;
+    }
+    DesktopTopbarRenderer desktop_topbar_renderer = 121028084;
+  }
+  Topbar topbar = 25;
+
+  // flags & tags
+  message Microformat {
+    message MicroformatDataRenderer {
+      bool noindex = 21;
+      bool unlisted = 22;
+      bool family_safe = 24;
+      repeated string tags = 25;
+      repeated string available_countries = 26;
+    }
+    MicroformatDataRenderer microformat_data_renderer = 75249450;
+  }
+  Microformat microformat = 27;
+
+  // browse continuation
+  message OnResponseReceivedEndpoints {
+    message AppendContinuationItemsAction {
+      message ContinuationItems {
+
+        message AboutChannelRenderer {
+          message Metadata {
+            message AboutChannelViewModel {
+              string description = 1;
+              string country = 6;
+              string subscriber_count_text = 9;
+              string view_count_text = 10;
+
+              message JoinedDateText {
+                string content = 1;
+              }
+              JoinedDateText joined_date_text = 11;
+              
+              string canonical_channel_url = 12;
+              string video_count_text = 16;
+
+              message SignInForBusinessEmail {
+                string content = 1;
+              }
+              SignInForBusinessEmail sign_in_for_business_email = 20;
+
+              message Links {
+                message ChannelExternalLinkViewModel {
+
+                  message Title {
+                    string content = 1;
+                  }
+                  Title title = 1;
+
+                  message Link {
+                    string content = 1;
+                  }
+                  Link link = 2;
+                }
+
+                ChannelExternalLinkViewModel channel_external_link_view_model = 22504;
+              }
+              repeated Links links = 26;
+            }
+            AboutChannelViewModel about_channel_view_model = 522039202;
+          }
+          Metadata metadata = 1;
+        }
+        AboutChannelRenderer about_channel_renderer = 520574426;
+      }
+      repeated ContinuationItems continuation_items = 2;
+    }
+    AppendContinuationItemsAction append_continuation_items_action = 160980450;
+
+  }
+  OnResponseReceivedEndpoints on_response_received_endpoints = 29;
+
+
+  message OnResponseReceivedActions {
+
+    // conditional redirect
+    message NavigateAction {
+      message Endpoint {
+        message BrowseEndpoint {
+          string browse_id = 2;
+        }
+        BrowseEndpoint browse_endpoint = 48687626;
+      }
+      Endpoint endpoint = 1;
+    }
+    NavigateAction navigate_action = 96328453;
+
+    message AppendContinuationItemsAction {
+      message ContinuationItems {
+        
+        // videos_continuation continuation token
+        message ContinuationItemRenderer {
+          message ContinuationEndpoint {
+            message ContinuationCommand {
+              string token = 1;
+            }
+            ContinuationCommand continuation_command = 280298060;
+          }
+          ContinuationEndpoint continuation_endpoint = 2;
+        }
+        ContinuationItemRenderer continuation_item_renderer = 159495980;
+
+        // videos_continuation video_id
+        message RichItemRenderer {
+          message ContentType {
+            message VideoRenderer {
+              string video_id = 1;
+              message ViewCountText {
+                string simple_text = 4;
+              }
+              ViewCountText view_count_text = 8;
+              message Badge {
+                message MetadataBadgeRenderer {
+                  message Icon {
+                    int64 icon_type = 1;
+                  }
+                  Icon icon = 1;
+                  string label = 3;
+                }
+                MetadataBadgeRenderer metadata_badge_renderer = 128361622;
+              }
+              repeated Badge badges = 10;
+              message UpcomingEventData {
+                message UpcomingEventText {
+                  message Runs {
+                    string text = 1;
+                  }
+
+                  repeated Runs runs = 1;
+                }
+                UpcomingEventText upcoming_event_text = 3;
+              }
+              UpcomingEventData upcoming_event_data = 17;
+            }
+            VideoRenderer video_renderer = 50577878;
+          }
+          ContentType content = 1;
+        }
+        RichItemRenderer rich_item_renderer = 258632786;
+      }
+      repeated ContinuationItems continuation_items = 2;
+    }
+    AppendContinuationItemsAction append_continuation_items_action = 160980450;
+
+    // videos most_popular
+    message ReloadContinuationItemsCommand {
+      message ContinuationItems {
+        message RichItemRenderer {
+          message ContentType {
+            message VideoRenderer {
+              string video_id = 1;
+              message ViewCountText {
+                string simple_text = 4;
+              }
+              ViewCountText view_count_text = 8;
+              message Badge {
+                message MetadataBadgeRenderer {
+                  message Icon {
+                    int64 icon_type = 1;
+                  }
+                  Icon icon = 1;
+                  string label = 3;
+                }
+                MetadataBadgeRenderer metadata_badge_renderer = 128361622;
+              }
+              repeated Badge badges = 10;
+              message UpcomingEventData {
+                message UpcomingEventText {
+                  message Runs {
+                    string text = 1;
+                  }
+
+                  repeated Runs runs = 1;
+                }
+                UpcomingEventText upcoming_event_text = 3;
+              }
+              UpcomingEventData upcoming_event_data = 17;
+            }
+            VideoRenderer video_renderer = 50577878;
+          }
+          ContentType content = 1;
+        }
+        RichItemRenderer rich_item_renderer = 258632786;
+      }
+      repeated ContinuationItems continuation_ttems = 2;
+    }
+    ReloadContinuationItemsCommand reload_continuation_items_command = 293675513;
+  }
+  OnResponseReceivedActions on_response_received_actions = 30;
+}

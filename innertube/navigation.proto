@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package youtube.innertube;
+
+import "innertube/context.proto";
+
+message ResolveUrlRequest {
+  Context context = 1;
+  string url = 2;
+}
+
+message ResolveUrlResponse {
+  message endpoint_type {
+    message browseEndpoint_type {
+      string browseId = 2;
+    }
+    browseEndpoint_type browseEndpoint = 48687626;
+
+    message UrlEndpoint {
+      string url = 1;
+    }
+    UrlEndpoint urlEndpoint = 49679253;
+  }
+  endpoint_type endpoint = 2;
+}

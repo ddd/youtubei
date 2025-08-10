@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package youtube.innertube;
+
+message Context {
+  Client client = 1;
+};
+
+message Client {
+  int32 clientName = 16;
+  string clientVersion = 17;
+};

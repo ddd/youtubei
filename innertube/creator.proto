@@ -1,0 +1,123 @@
+syntax = "proto3";
+
+package youtube.innertube;
+
+import "innertube/context.proto";
+
+message CreatorChannelMask {
+    bool channel_id = 2;
+    bool title = 3;
+    message ThumbnailDetailsMask {
+      bool all = 1;
+    }
+    ThumbnailDetailsMask thumbnail_details = 5;
+    message MetricsMask {
+      bool all = 1;
+    }
+    MetricsMask metric = 10;
+    bool time_created_seconds = 13;
+    bool is_name_verified = 18;
+    message CommentsSettings {
+      message HiddenUsers {
+        bool all = 1;
+      }
+      HiddenUsers hidden_users = 4;
+    }
+    CommentsSettings comments_settings = 40;
+    bool channel_handle = 45;
+}
+
+message GetCreatorChannelsRequest {
+  Context context = 1;
+  repeated string channel_ids = 2;
+  CreatorChannelMask mask = 4;
+}
+
+message GetCreatorChannelsResponse {
+
+  message Channel {
+    string channel_id = 1;
+    string title = 2;
+
+    message ThumbnailDetails {
+
+      message Thumbnail {
+        string url = 1;
+      }
+
+      repeated Thumbnail thumbnails = 1;
+    }
+
+    ThumbnailDetails thumbnail_details = 4;
+
+    message Metric {
+      int64 subscriber_count = 1;
+      int64 video_count = 2;
+      int64 total_video_view_count = 3;
+    }
+
+    Metric metric = 9;
+    int64 time_created_seconds = 12;
+
+    message ContentOwnerAssociation {
+      string external_content_owner_id = 1;
+
+      message CreateTime {
+        int64 seconds = 1;
+        int64 nanos = 2;
+      }
+      CreateTime create_time = 2;
+
+      message Permissions {
+        bool can_web_claim = 1;
+        bool can_view_revenue = 2;
+        bool can_enable_cid = 3;
+        bool disable_ad_blocking_settings = 4;
+      }
+      Permissions permissions = 3;
+      bool is_default_channel = 5;
+
+      message ActivateTime {
+        int64 seconds = 1;
+        int64 nanos = 2;
+      }
+      ActivateTime activate_time = 6;
+    }
+
+    ContentOwnerAssociation content_owner_association = 16;
+    bool is_name_verified = 17;
+
+    message CommentSettings {
+      message HiddenUsers {
+        string display_name = 2;
+        string channel_id = 4;
+        message AvatarThumbnail {
+          message Thumbnail {
+            string url = 1;
+          }
+          repeated Thumbnail thumbnails = 1;
+        }
+        AvatarThumbnail avatar_thumbnail = 5;
+      }
+      HiddenUsers hidden_users = 3;
+    }
+    CommentSettings comment_settings = 39;
+    string channel_handle = 44;
+  }
+
+  repeated Channel channels = 4;
+}
+
+message SearchPublicCreatorEntitiesRequest {
+  Context context = 1;
+  string query = 2;
+  message Filter {
+    enum RestrictResultType {
+      RESULT_TYPE_UNKNOWN = 0;
+      RESULT_TYPE_RESTRICT_TYPE_CHANNEL_FOR_COLLABORATION = 10;
+    }
+    RestrictResultType restrict_result_type = 1;
+  }
+  Filter filter = 4;
+  CreatorChannelMask channel_mask = 7;
+}

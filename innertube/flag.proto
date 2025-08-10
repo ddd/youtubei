@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package youtube.innertube;
+
+import "innertube/context.proto";
+
+enum HideUserOptions {
+    UNKNOWN = 0;
+    HIDE_USER = 1;
+    UNHIDE_USER = 2;
+}
+
+message HideUserAction {
+  string user_id = 1;
+  HideUserOptions options = 2;
+}
+
+message FlagRequest {
+  Context context = 1;
+  string action = 2;
+}
