@@ -18,7 +18,7 @@ use hyper_util::rt::TokioExecutor;
 mod tests;
 
 mod youtube {
-    include!("../pb/youtube.innertube.rs");
+    include!(concat!(env!("OUT_DIR"), "/youtube.innertube.rs"));
 }
 
 pub mod browse;
