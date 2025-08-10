@@ -14,7 +14,7 @@ fn main() -> Result<()> {
     ];
 
     let proto_paths = [
-        PathBuf::from("../youtubei"),
+        PathBuf::from("."),
     ];
 
     // Debug information
