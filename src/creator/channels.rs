@@ -150,7 +150,7 @@ impl<'a> GetCreatorChannelsRequest<'a> {
                 if let Some(first_thumbnail) = thumbnail_details.thumbnails.first() {
                     let avatar_url = first_thumbnail.url.clone();
                     // Check if it's a default profile picture
-                    if !avatar_url.starts_with("https://yt") {
+                    if avatar_url.starts_with("https://yt") {
                         // Remove the base URL prefix by finding the first occurrence of googleusercontent.com/
                         if let Some(index) = avatar_url.find(".ggpht.com/") {
                             let stripped_url = &avatar_url[(index + ".ggpht.com/".len())..];
@@ -286,13 +286,11 @@ impl<'a> GetHiddenUsersRequest<'a> {
                             .to_string();
                         
                         let mut avatar_url = None;
-                        
                         // Extract avatar URL if available
                         if let Some(thumbnails) = hidden_user_data["avatarThumbnail"]["thumbnails"].as_array() {
                             if let Some(first_thumbnail) = thumbnails.first() {
                                 if let Some(url) = first_thumbnail["url"].as_str() {
-                                    // Process avatar URL similar to profile picture processing
-                                    if !url.starts_with("https://yt") {
+                                    if url.starts_with("https://yt") {
                                         if let Some(index) = url.find(".ggpht.com/") {
                                             let stripped_url = &url[(index + ".ggpht.com/".len())..];
                                             let clean_url = stripped_url.split('=').next().unwrap_or(stripped_url);
