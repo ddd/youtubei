@@ -154,6 +154,10 @@ impl DetectCountryCodeRequest {
                     return Ok(CountryCodeResult {
                         country_code: desktop_topbar_renderer.country_code.clone(),
                     });
+                } else {
+                    return Ok(CountryCodeResult {
+                        country_code: "US".to_string(),
+                    });
                 }
             }
         }
