@@ -9,7 +9,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-youtubei = "0.1.2"
+youtubei = "0.1.3"
 ```
 
 ## Quick Start
