@@ -10,6 +10,7 @@ use crate::utils::parse_numeric_string;
 use crate::models::Video;
 use crate::browse::videos::GetVideosResponse;
 use crate::browse::videos::BLACKLISTED_BADGE_LABELS;
+use crate::browse::videos::{parse_length_text, parse_published_time_text};
 
 pub struct GetVideosContinuationRequest<'a> {
     pub client: &'a mut Client<HttpsConnector<HttpConnector>, Full<Bytes>>,
@@ -138,7 +139,7 @@ impl<'a> GetVideosExtendedContinuationRequest<'a> {
             .uri(format!("https://{}/youtubei/v1/browse", self.ip))
             .header("Host", "youtubei.googleapis.com")
             .header("Content-Type", "application/x-protobuf")
-            .header("X-Goog-Fieldmask", "onResponseReceivedActions.appendContinuationItemsAction.continuationItems(richItemRenderer.content.videoRenderer(videoId,viewCountText.simpleText,badges),continuationItemRenderer.continuationEndpoint.continuationCommand.token)")
+            .header("X-Goog-Fieldmask", "onResponseReceivedActions.appendContinuationItemsAction.continuationItems(richItemRenderer.content.videoRenderer(videoId,viewCountText.simpleText,lengthText.simpleText,publishedTimeText.simpleText,badges),continuationItemRenderer.continuationEndpoint.continuationCommand.token)")
             .body(Full::new(Bytes::from(payload)))
             .map_err(|e| YouTubeError::Other(Box::new(e)))?;
 
@@ -194,11 +195,21 @@ impl<'a> GetVideosExtendedContinuationRequest<'a> {
                                             }
                                         });
 
+                                    let length_seconds = video.length_text
+                                        .as_ref()
+                                        .and_then(|lt| parse_length_text(&lt.simple_text));
+
+                                    let approx_published_time = video.published_time_text
+                                        .as_ref()
+                                        .and_then(|pt| parse_published_time_text(&pt.simple_text));
+
                                     videos.push(Video {
                                         video_id: video.video_id,
                                         views,
                                         hidden_view_count,
-                                        badge
+                                        badge,
+                                        length_seconds,
+                                        approx_published_time
                                     });
                                 }
                             }

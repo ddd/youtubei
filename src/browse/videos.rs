@@ -10,12 +10,89 @@ use crate::models::Video;
 use crate::utils::{generate_continuation_token, parse_numeric_string};
 use std::collections::HashSet;
 use once_cell::sync::Lazy;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 pub static BLACKLISTED_BADGE_LABELS: Lazy<HashSet<&'static str>> = Lazy::new(|| {
     HashSet::from([
         "360°", "VR180", "Fundraiser"
      ])
 });
+
+pub fn parse_length_text(length_text: &str) -> Option<i32> {
+    let parts: Vec<&str> = length_text.split(':').collect();
+    
+    match parts.len() {
+        2 => {
+            // Format: MM:SS
+            let minutes = parts[0].parse::<i32>().ok()?;
+            let seconds = parts[1].parse::<i32>().ok()?;
+            Some(minutes * 60 + seconds)
+        }
+        3 => {
+            // Format: HH:MM:SS
+            let hours = parts[0].parse::<i32>().ok()?;
+            let minutes = parts[1].parse::<i32>().ok()?;
+            let seconds = parts[2].parse::<i32>().ok()?;
+            Some(hours * 3600 + minutes * 60 + seconds)
+        }
+        _ => None
+    }
+}
+
+pub fn parse_published_time_text(published_text: &str) -> Option<i64> {
+    let current_time = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .ok()?
+        .as_secs() as i64;
+    
+    let text = published_text.to_lowercase();
+    
+    if text.contains("second") {
+        if let Some(num_str) = text.split_whitespace().next() {
+            if let Ok(seconds) = num_str.parse::<i64>() {
+                return Some(current_time - seconds);
+            }
+        }
+    } else if text.contains("minute") {
+        if let Some(num_str) = text.split_whitespace().next() {
+            if let Ok(minutes) = num_str.parse::<i64>() {
+                return Some(current_time - (minutes * 60));
+            }
+        }
+    } else if text.contains("hour") {
+        if let Some(num_str) = text.split_whitespace().next() {
+            if let Ok(hours) = num_str.parse::<i64>() {
+                return Some(current_time - (hours * 3600));
+            }
+        }
+    } else if text.contains("day") {
+        if let Some(num_str) = text.split_whitespace().next() {
+            if let Ok(days) = num_str.parse::<i64>() {
+                return Some(current_time - (days * 86400));
+            }
+        }
+    } else if text.contains("week") {
+        if let Some(num_str) = text.split_whitespace().next() {
+            if let Ok(weeks) = num_str.parse::<i64>() {
+                return Some(current_time - (weeks * 604800));
+            }
+        }
+    } else if text.contains("month") {
+        if let Some(num_str) = text.split_whitespace().next() {
+            if let Ok(months) = num_str.parse::<i64>() {
+                return Some(current_time - (months * 2629746)); // ~30.44 days per month
+            }
+        }
+    } else if text.contains("year") {
+        if let Some(num_str) = text.split_whitespace().next() {
+            if let Ok(years) = num_str.parse::<i64>() {
+                return Some(current_time - (years * 31556952)); // ~365.25 days per year
+            }
+        }
+    }
+    
+    None
+}
 
 pub struct GetVideosRequest<'a> {
     pub client: &'a mut Client<HttpsConnector<HttpConnector>, Full<Bytes>>,
@@ -174,7 +251,7 @@ impl<'a> GetVideosExtendedRequest<'a> {
             .uri(format!("https://{}/youtubei/v1/browse", self.ip))
             .header("Host", "youtubei.googleapis.com")
             .header("Content-Type", "application/x-protobuf")
-            .header("X-Goog-Fieldmask", "contents.twoColumnBrowseResultsRenderer.tabs.tabRenderer.content.richGridRenderer.contents(richItemRenderer.content.videoRenderer(videoId,viewCountText.simpleText,badges,upcomingEventData),continuationItemRenderer.continuationEndpoint.continuationCommand.token)")
+            .header("X-Goog-Fieldmask", "contents.twoColumnBrowseResultsRenderer.tabs.tabRenderer.content.richGridRenderer.contents(richItemRenderer.content.videoRenderer(videoId,viewCountText.simpleText,lengthText.simpleText,publishedTimeText.simpleText,badges,upcomingEventData),continuationItemRenderer.continuationEndpoint.continuationCommand.token)")
             .body(Full::new(Bytes::from(payload)))
             .map_err(|e| YouTubeError::Other(Box::new(e)))?;
 
@@ -233,11 +310,21 @@ impl<'a> GetVideosExtendedRequest<'a> {
                                                             }
                                                         });
 
+                                                    let length_seconds = video.length_text
+                                                        .as_ref()
+                                                        .and_then(|lt| parse_length_text(&lt.simple_text));
+
+                                                    let approx_published_time = video.published_time_text
+                                                        .as_ref()
+                                                        .and_then(|pt| parse_published_time_text(&pt.simple_text));
+
                                                     videos.push(Video {
                                                         video_id: video.video_id,
                                                         views,
                                                         hidden_view_count,
-                                                        badge
+                                                        badge,
+                                                        length_seconds,
+                                                        approx_published_time
                                                     });
                                                 }
                                             }
@@ -280,7 +367,7 @@ impl<'a> AsMut<InnerTubeRequestFields<'a>> for GetPopularVideosRequest<'a> {
 }
 
 impl<'a> GetPopularVideosRequest<'a> {
-    pub async fn send(self) -> Result<Vec<Video>, YouTubeError> {
+    pub async fn send(self) -> Result<(Vec<Video>, Option<String>), YouTubeError> {
         let request = youtube::BrowseRequest {
             context: Some(youtube::Context {
                 client: Some(youtube::Client { 
@@ -304,7 +391,7 @@ impl<'a> GetPopularVideosRequest<'a> {
             .uri(format!("https://{}/youtubei/v1/browse", self.ip))
             .header("Host", "youtubei.googleapis.com")
             .header("Content-Type", "application/x-protobuf")
-            .header("X-Goog-Fieldmask", "onResponseReceivedActions.reloadContinuationItemsCommand.continuationItems.richItemRenderer.content.videoRenderer(videoId,viewCountText.simpleText,badges)")
+            .header("X-Goog-Fieldmask", "onResponseReceivedActions.reloadContinuationItemsCommand.continuationItems(richItemRenderer.content.videoRenderer(videoId,viewCountText.simpleText,lengthText.simpleText,publishedTimeText.simpleText,badges),continuationItemRenderer.continuationEndpoint.continuationCommand.token)")
             .body(Full::new(Bytes::from(payload)))
             .map_err(|e| YouTubeError::Other(Box::new(e)))?;
 
@@ -322,8 +409,9 @@ impl<'a> GetPopularVideosRequest<'a> {
         let response = youtube::BrowseResponse::decode(body_bytes)?;
 
         let mut videos = Vec::new();
+        let mut continuation = None;
 
-        // Parse the response to extract videos with view counts
+        // Parse the response to extract videos with view counts and continuation token
         if let Some(actions) = response.on_response_received_actions {
             if let Some(command) = actions.reload_continuation_items_command {
                 for item in command.continuation_ttems {
@@ -358,12 +446,33 @@ impl<'a> GetPopularVideosRequest<'a> {
                                             }
                                         });
 
+                                    let length_seconds = video.length_text
+                                        .as_ref()
+                                        .and_then(|lt| parse_length_text(&lt.simple_text));
+
+                                    let approx_published_time = video.published_time_text
+                                        .as_ref()
+                                        .and_then(|pt| parse_published_time_text(&pt.simple_text));
+
                                     videos.push(Video {
                                         video_id: video.video_id,
                                         views,
                                         hidden_view_count,
-                                        badge
+                                        badge,
+                                        length_seconds,
+                                        approx_published_time
                                     });
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Extract continuation token if present
+                    if let Some(cont_item) = item.continuation_item_renderer {
+                        if let Some(endpoint) = cont_item.continuation_endpoint {
+                            if let Some(command) = endpoint.continuation_command {
+                                if !command.token.is_empty() {
+                                    continuation = Some(command.token);
                                 }
                             }
                         }
@@ -372,6 +481,6 @@ impl<'a> GetPopularVideosRequest<'a> {
             }
         }
 
-        Ok(videos)
+        Ok((videos, continuation))
     }
 }

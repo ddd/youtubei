@@ -45,6 +45,14 @@ message BrowseResponse {
                   message Content {
                     message VideoRenderer {
                       string video_id = 1;
+                      message PublishedTimeText {
+                        string simple_text = 4;
+                      }
+                      PublishedTimeText published_time_text = 6;
+                      message LengthText {
+                        string simple_text = 4;
+                      }
+                      LengthText length_text = 7;
                       message ViewCountText {
                         string simple_text = 4;
                       }
@@ -356,6 +364,14 @@ message BrowseResponse {
           message ContentType {
             message VideoRenderer {
               string video_id = 1;
+              message PublishedTimeText {
+                string simple_text = 4;
+              }
+              PublishedTimeText published_time_text = 6;
+              message LengthText {
+                string simple_text = 4;
+              }
+              LengthText length_text = 7;
               message ViewCountText {
                 string simple_text = 4;
               }
@@ -396,10 +412,28 @@ message BrowseResponse {
     // videos most_popular
     message ReloadContinuationItemsCommand {
       message ContinuationItems {
+        message ContinuationItemRenderer {
+          message ContinuationEndpoint {
+            message ContinuationCommand {
+              string token = 1;
+            }
+            ContinuationCommand continuation_command = 280298060;
+          }
+          ContinuationEndpoint continuation_endpoint = 2;
+        }
+        ContinuationItemRenderer continuation_item_renderer = 159495980;
         message RichItemRenderer {
           message ContentType {
             message VideoRenderer {
               string video_id = 1;
+              message PublishedTimeText {
+                string simple_text = 4;
+              }
+              PublishedTimeText published_time_text = 6;
+              message LengthText {
+                string simple_text = 4;
+              }
+              LengthText length_text = 7;
               message ViewCountText {
                 string simple_text = 4;
               }

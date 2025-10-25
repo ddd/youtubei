@@ -329,10 +329,13 @@ async fn test_get_popular_videos() -> Result<(), Box<dyn Error>> {
     
     let mut innertube = InnertubeClient::new(None, "youtubei.googleapis.com".to_string(), None).await;
     
-    let videos = innertube.get_popular_videos(channel_id).send().await?;
+    let (videos, continuation) = innertube.get_popular_videos(channel_id).send().await?;
     
     // Should get a list of popular videos
     assert!(!videos.is_empty());
+    
+    // Should have a continuation token for pagination
+    assert!(continuation.is_some(), "Popular videos should have a continuation token for pagination");
     
     // Test format and validity of returned videos
     for video in &videos {
@@ -356,10 +359,26 @@ async fn test_get_popular_videos_hidden_views() -> Result<(), Box<dyn Error>> {
     
     let mut innertube = InnertubeClient::new(None, "youtubei.googleapis.com".to_string(), None).await;
     
-    let videos = innertube.get_popular_videos(channel_id).send().await?;
+    let (videos, continuation) = innertube.get_popular_videos(channel_id).send().await?;
     
     // Should get videos back
     assert!(!videos.is_empty());
+    
+    // Check first video specifics
+    let first_video = &videos[0];
+    assert_eq!(first_video.length_seconds, Some(79), "First video should have length of 79 seconds");
+    
+    // Check that first video was uploaded approximately 15 years ago
+    if let Some(published_time) = first_video.approx_published_time {
+        let current_time = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as i64;
+        let years_ago = (current_time - published_time) / (365 * 24 * 60 * 60);
+        assert!(years_ago >= 14 && years_ago <= 16, "First video should be uploaded approximately 15 years ago, but was {} years ago", years_ago);
+    } else {
+        panic!("First video should have published time");
+    }
     
     let mut found_hidden = false;
     let mut found_visible = false;

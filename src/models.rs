@@ -68,7 +68,9 @@ pub struct Video {
     pub video_id: String,
     pub views: i64,
     pub hidden_view_count: bool,
-    pub badge: Option<String>
+    pub badge: Option<String>,
+    pub length_seconds: Option<i32>,
+    pub approx_published_time: Option<i64>
 }
 
 #[derive(Debug, Clone)]
